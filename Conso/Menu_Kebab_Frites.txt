@@ -1,0 +1,6 @@
+Nom Kebab_Frites
+Prix 6.5
+Plat ['Kebab']
+Boisson True
+Vegan False
+Epice False

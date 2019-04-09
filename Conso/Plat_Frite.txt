@@ -1,0 +1,7 @@
+Nom Frite
+Prix 1
+Composants ['Patate']
+Parametre []
+Vegan False
+Epice False
+Accompagnements []
