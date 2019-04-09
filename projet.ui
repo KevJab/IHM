@@ -30,7 +30,7 @@
      </rect>
     </property>
     <property name="autoFillBackground">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -139,7 +139,7 @@
      </rect>
     </property>
     <property name="autoFillBackground">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -203,23 +203,15 @@
         <height>725</height>
        </rect>
       </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QWidget" name="horizontalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>901</width>
-         <height>731</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="layoutVueCommandes"/>
-      </widget>
      </widget>
     </widget>
    </widget>
