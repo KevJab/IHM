@@ -1,6 +1,6 @@
 Nom Kebab_Frites
 Prix 6.5
-Plat ['Kebab']
+Plat Kebab,Frite
 Boisson True
 Vegan False
 Epice False

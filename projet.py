@@ -2,12 +2,11 @@
 
 # Form implementation generated from reading ui file 'projet.ui'
 #
-# Created by: PyQt5 UI code generator 5.12
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -86,5 +85,4 @@ class Ui_MainWindow(object):
         self.toCommandes.setText(_translate("MainWindow", "Commandes"))
         self.toGestionCarte.setText(_translate("MainWindow", "Gestion de la carte"))
         self.toGestionSalle.setText(_translate("MainWindow", "Gestion de la salle"))
-
 

@@ -1,7 +1,7 @@
 Nom Frite
 Prix 1
-Composants ['Patate']
+Composants Patate
 Parametre []
 Vegan False
 Epice False
-Accompagnements []
+Accompagnements 
