@@ -1,9 +1,5 @@
 import pickle
 class Composant():
-    nom =""
-    allergenes = False
-    vegan = False
-    epice = 0
     def __init__(self,n,a,v,e):
         self.nom = n
         self.allergenes = a
@@ -12,10 +8,13 @@ class Composant():
 
     def estEpice(self):
         return self.epice
+
     def estVegan(self):
         return self.vegan
+
     def estAllergene(self):
         return self.allergenes,self.nom
+
     def saveComposant(self):
         new_Plat = open("Conso/Composant_"+self.nom+".txt","w")
         new_Plat.write("Nom "+self.nom+"\n")
@@ -24,13 +23,8 @@ class Composant():
         new_Plat.write("Epice "+str(self.epice)+"\n")
         new_Plat.close()
 
-    
+
 class Consommations():
-    nom = ""
-    prix = 0
-    comp = []
-    parametres = dict()
-    commentaire = ""
     def __init__(self,n,p,comp,pa,com):
         self.nom = n
         self.prix = p
@@ -43,11 +37,13 @@ class Consommations():
             if(not i.estVegan):
                 return False
         return True
+
     def getPrix(self):
         return self.prix
-    
+
     def getComp(self):
         return self.comp
+
     def allergen(self):
         a = []
         al = False
@@ -58,9 +54,8 @@ class Consommations():
                  a.append(iA)
         return al,a
 
+
 class Boisson(Consommations):
-    alcoolise = False
-    quantite = 0
     def __init__(self,n,p,comp,pa,com,a,q):
         super(Boisson,self).__init__(n,p,comp,pa,com)
         self.alcoolise = a
@@ -68,7 +63,7 @@ class Boisson(Consommations):
 
     def estAlcoolise(self):
         return self.alcoolise
-    
+
     def saveBoisson(self):
         new_Plat = open("Conso/Boisson_"+self.nom+".txt","w")
         new_Plat.write("Nom "+self.nom+"\n")
@@ -83,25 +78,30 @@ class Boisson(Consommations):
         for i in self.comp:
             i.saveComposant()
 
+
 class Plat(Consommations):
-    vegan = True
-    epice = False
     def __init__(self,n,p,c,pa,com,acc):
         super(Plat,self).__init__(n,p,c,pa,com)
+        self.vegan = True
+        self.epice = False
         self.accompagnements = acc
+
         for i in self.comp:
             if(i.estEpice()):
                 self.epice = True
             if(not i.estVegan()):
                 self.vegan = False
+
         for j in self.accompagnements:
             for k in j.comp:
                 if(i.estEpice()):
                     self.epice = True
                 if(not i.estVegan()):
                     self.vegan = False
+
     def estEpice(self):
         return self.epice
+
     def estVegan(self):
         return self.vegan
 
@@ -126,19 +126,17 @@ class Plat(Consommations):
         for i in self.accompagnements:
             i.savePlat()
 
+
 class Menu():
-    nom=""
-    plats=[]
-    prix = 0
-    avecBoisson= False
-    boisson= None
-    vegan = True
-    epice = False
     def __init__(self,nom,p,b,pr):
         self.nom = nom
         self.plats = p
         self.boisson = b
         self.prix = pr
+        self.epice = False
+        self.vegan = True
+        self.avecBoisson= False
+
         if(b != None):
             self.avecBoisson = True
         for i in self.plats:
@@ -146,7 +144,7 @@ class Menu():
                 self.vegan = False
             if(i.estEpice()):
                 self.epice = True
-    
+
     def saveMenu(self):
         new_Plat = open("Conso/Menu_"+self.nom+".txt","w")
         new_Plat.write("Nom "+self.nom+"\n")
@@ -163,14 +161,9 @@ class Menu():
             i.savePlat()
         if(self.boisson!= None):
             self.boisson.saveBoisson()
-        
+
 
 class Commande():
-    menus=[]
-    plats=[]
-    boissons=[]
-    table = 0
-    pret = False
     def __init__(self,m,p,b,tab):
         self.menus = m
         self.plats = p
@@ -185,6 +178,6 @@ oignon = Composant("Oignon",True,False,False)
 patate = Composant("Patate",True,False,False)
 coca = Boisson("Coca",1,[],[],"",False,25)
 f = Plat("Frite",1,[patate],[],"",[])
-a = Plat("Kebab",6,[viande,salade,tomate,oignon],[],"",[f])  
-m = Menu("Kebab_Frites",[a],coca,6.5) 
-m.saveMenu()       
+a = Plat("Kebab",6,[viande,salade,tomate,oignon],[],"",[f])
+m = Menu("Kebab_Frites",[a],coca,6.5)
+m.saveMenu()
