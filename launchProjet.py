@@ -21,7 +21,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         m = Menu("Kebab_Frites",[kebab, frite],coca,6.5)
         self.commande = Commande([m], [poulet, crevette], [pepsi], None)  # Commande pour tester
         self.all_commandes = [self.commande, deepcopy(self.commande), deepcopy(self.commande)]
-        self.vue = "Commande"
+        self.vue = "Plats"
         super(MainWindow, self).__init__()
         self.setupUi(self)
 
