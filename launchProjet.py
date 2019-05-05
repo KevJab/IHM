@@ -5,6 +5,7 @@ import glob, os
 from projet import Ui_MainWindow
 from classes import *
 from copy import deepcopy
+import dessin
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -18,10 +19,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         crevette = Plat("Crevette",1,[],[],"",[])
         coca = Boisson("Coca",1,[],[],"",False,25)
         pepsi = Boisson("Pepsi",1,[],[],"",False,25)
+        
         m = Menu("Kebab_Frites",[kebab, frite],coca,6.5)
+        self.taille_restau = [30, 30]
+        self.liste_tables = [[(1,1),(2,1),(1,2),(2,2)], [(5,5),(5,6),(5,7),(6,5),(6,6),(6,7)]]
+        self.liste_chaises = [(0,1),(0,2),(3,1),(3,2),(5,4),(6,4),(4,5),(4,6),(4,7),(7,5),(7,6),(7,7),(5,8),(6,8)]
         self.commande = Commande([m], [poulet, crevette], [pepsi], None)  # Commande pour tester
         self.all_commandes = [self.commande, deepcopy(self.commande), deepcopy(self.commande)]
-        self.vue = "Plats"
+        self.vue = "Tables"
         super(MainWindow, self).__init__()
         self.setupUi(self)
 
@@ -149,6 +154,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 #TODO quand le bouton est push ajouter le menu à la commande (self.commande)
 
+        elif(self.vue == "Tables"):
+            frame = self.findChild(QFrame,"frameVueCommandes")
+            frame.setEnabled(True)
+            obj = QHBoxLayout(frame)
+            obj2 = QVBoxLayout()
+            dess = dessin.Dessin(self.taille_restau, self.liste_tables, self.liste_chaises)
+            obj2.addWidget(dess)
+            obj.addLayout(obj2)
 
 def main():
     app = QApplication(sys.argv)
