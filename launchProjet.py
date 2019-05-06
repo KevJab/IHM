@@ -1,11 +1,16 @@
 import sys
 
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 import glob, os
 from projet import Ui_MainWindow
 from classes import *
 from copy import deepcopy
 import dessin
+import modif_chaises
+import dessin_modif
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -24,9 +29,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.taille_restau = [30, 30]
         self.liste_tables = [[(1,1),(2,1),(1,2),(2,2)], [(5,5),(5,6),(5,7),(6,5),(6,6),(6,7)]]
         self.liste_chaises = [(0,1),(0,2),(3,1),(3,2),(5,4),(6,4),(4,5),(4,6),(4,7),(7,5),(7,6),(7,7),(5,8),(6,8)]
+        self.X = 0
+        self.Y = 0
+        self.dessin = None
+        self.obj2 = QVBoxLayout()
+        self.formTables = None
         self.commande = Commande([m], [poulet, crevette], [pepsi], None)  # Commande pour tester
         self.all_commandes = [self.commande, deepcopy(self.commande), deepcopy(self.commande)]
-        self.vue = "Tables"
+        self.vue = "Modif_Tables"
         super(MainWindow, self).__init__()
         self.setupUi(self)
 
@@ -162,6 +172,162 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             dess = dessin.Dessin(self.taille_restau, self.liste_tables, self.liste_chaises)
             obj2.addWidget(dess)
             obj.addLayout(obj2)
+
+        elif(self.vue == "Modif_Tables"):
+            frame = self.findChild(QFrame,"frameVueCommandes")
+            frame.setEnabled(True)
+            obj = QHBoxLayout(frame)
+            grid = QGridLayout()
+            modifchaises = modif_chaises.Modif()
+            grid.addWidget(modifchaises,0,0)
+            bouttonPlus = QPushButton("+")
+            bouttonPlus.resize(100,32)
+            grid.addWidget(bouttonPlus,0,1)
+            bouttonPlus.clicked.connect(self.ajouterChaises)
+            bouttonMoins = QPushButton("-")
+            bouttonMoins.resize(100,32)
+            grid.addWidget(bouttonMoins,0,2)
+            bouttonMoins.clicked.connect(self.retirerChaises)
+            #partie pour les tables
+            Nomtables = QLabel("Nombre de tables:")
+            Nomtables.setAlignment(Qt.AlignCenter)
+            grid.addWidget(Nomtables, 1, 0, 1, 2)
+            self.formTables = QSpinBox()
+            grid.addWidget(self.formTables, 1, 2)
+            self.formTables.valueChanged.connect(self.modifTables)
+            self.obj2.addLayout(grid)
+            self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+            self.obj2.addWidget(self.dessin)
+            obj.addLayout(self.obj2)
+
+    def modifTables(self):
+        nbTables = self.formTables.value()
+        table = self.trouverTable()
+        tab = []
+        if table == None and nbTables%2 == 0:
+            a = self.X//10
+            b = self.Y//10
+            for i in range(0, 2):
+                for j in range(0, nbTables//2):
+                    tab.append((i+a, j+b))
+        if len(tab) > 0:
+            self.liste_tables.append(tab)
+            self.dessin.deleteLater()
+            self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+            self.obj2.addWidget(self.dessin)
+
+
+    def ajouterChaises(self):
+        table = self.trouverTable()
+        a, b = table[0]
+        c, d = table[len(table)-1]
+        ajouter = False
+        print("liste")
+        print(self.liste_chaises)
+        print("okay")
+        print(c-a)
+        for i in range(0, c-a+1):
+            trouver1 = False
+            trouver2 = False
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                if (r == i+a and s == b-1) and not(ajouter):
+                    trouver1 = True
+
+                if (r == i+a and s == d+1) and not(ajouter):
+                    trouver2 = True
+            if not(trouver1) and not(ajouter):
+                self.liste_chaises.append((i+a, b-1))
+                ajouter = True
+
+            if not(trouver2) and not(ajouter):
+                self.liste_chaises.append((i+a, d+1))
+                ajouter = True
+                  
+        for i in range(0, d-b+1):
+            trouver1 = False
+            trouver2 = False
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                if (r == a-1 and s == i+b) and not(ajouter):
+                    trouver1 = True
+
+                if (r == c+1 and s == i+b) and not(ajouter):
+                    trouver2 = True
+
+            if not(trouver1) and not(ajouter): 
+                self.liste_chaises.append((a-1, i+b))
+                ajouter = True
+            
+            if not(trouver2) and not(ajouter):
+                self.liste_chaises.append((c+1, i+b))
+                ajouter = True
+                
+        self.dessin.deleteLater()
+        self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+        self.obj2.addWidget(self.dessin)
+
+
+    def retirerChaises(self):
+        table = self.trouverTable()
+        a, b = table[0]
+        c, d = table[len(table)-1]
+        retirer = False
+        print("liste")
+        print(self.liste_chaises)
+        for i in range(0, c-a+1):
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                if (r == i+a and s == b-1) and not(retirer):
+                    self.liste_chaises.remove((i+a, b-1))
+                    retirer = True
+                    break
+
+                if (r == i+a and s == d+1) and not(retirer):
+                    self.liste_chaises.remove((i+a, d+1))
+                    retirer = True
+                    break
+
+        for i in range(0, d-b+1):
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                print("okay2")
+                print(r)
+                print(s)
+                print(i+b)
+                print(a-1)
+                print(c+1)
+                if (r == a-1 and s == i+b) and not(retirer):
+                    self.liste_chaises.remove((a-1, i+b))
+                    retirer = True
+                    break
+
+                if (r == c+1 and s == i+b) and not(retirer):
+                    self.liste_chaises.remove((c+1, i+b))
+                    retirer = True
+                    break
+                
+        self.dessin.deleteLater()
+        self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+        self.obj2.addWidget(self.dessin)
+
+    def modifXY(self, x, y):
+        self.X = x
+        self.Y = y
+        print("XY")
+        print(self.X)
+        print(self.Y)
+        print(self.trouverTable())
+
+    def trouverTable(self):
+        nb_tables = len(self.liste_tables)
+        for i in range(nb_tables):
+            nb_rect = len(self.liste_tables[i])
+            a, b = self.liste_tables[i][0]
+            c, d = self.liste_tables[i][nb_rect-1]
+            if self.X >= a*10 and self.X <= (c+1)*10 and self.Y >= b*10 and self.Y <= (d+1)*10:
+                return self.liste_tables[i]
+
 
 def main():
     app = QApplication(sys.argv)
