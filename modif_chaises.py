@@ -21,7 +21,4 @@ class Modif(QWidget):
         point = QPoint(10,10)
         image = QImage("Icons/chaise.jpg");
         painter.drawImage(point, image);
-
-        painter.drawRect(x*10, y*10, 10, 10)
-
         painter.end()
