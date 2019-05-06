@@ -95,13 +95,11 @@ class MyMainWindow(QMainWindow):
         # A list of all current orders
         self.orders_widget = QWidget()
         self.layout_order = QHBoxLayout(self.orders_widget)
-        #FIXME remplir ce widget lors de son chargement (méthode orders)
         self.stack.addWidget(self.orders_widget)
 
         # A recap of all you consumed
         self.payment_widget = QWidget()
         self.payment_layout = QVBoxLayout(self.payment_widget)
-        #FIXME idem (méthode payment)
         #TODO ajouter option de paiements séparés?
         self.stack.addWidget(self.payment_widget)
 
@@ -120,39 +118,46 @@ class MyMainWindow(QMainWindow):
 
     ###############################################
 
-    def menus(self): #FIXME signal quand on appuie sur le bouton menus
+    def menus(self): 
         self.stack.setCurrentWidget(self.menu_widget)
 
     ###############################################
 
-    def payment(self): #FIXME signal quand on appuie sur le bouton "payer"
+    def payment(self): 
         self.stack.setCurrentWidget(self.payment_widget)
         deleteItemsOfLayout(self.payment_layout)
 
-        self.textEdit = QTextEdit(self)
+        self.textEdit = QTextEdit()
         self.textEdit.setContentsMargins(0,0,0,0)
         s = ""
         total = 0
+        font = "helvetica"
 
-        s += "Boissons \n ----------------------------------\n"
+        s += "<b>Boissons</b>\n"
         if self.commande.boissons:
+            s += "<pre><font face='"+font+"'>"
             for n in self.commande.boissons:
                 s+= n.nom + "\t\t\t" + str(n.prix) + "€\n"
                 total += n.prix
-        s += "\n\nPlats \n ----------------------------------\n"
+            s += "</font></pre> <br>\n"
+        s += "<b>Plats</b>\n"
         if self.commande.plats:
+            s += "<pre><font face='"+font+"'>"
             for m in self.commande.plats:
                 s += m.nom + "\t\t\t" + str(m.prix) + "€\n"
                 total += m.prix
-        s += "\n\nMenus \n ----------------------------------\n"
+            s += "</font></pre> <br>\n"
+        s += "<b>Menus</b>\n"
         if self.commande.menus:
+            s += "<pre><font face='"+font+"'>"
             for o in self.commande.menus:
-                s += o.nom + "\t\t\t" + str(o.prix) + "€\n"
+                s += o.nom + "\t\t" + str(o.prix) + "€\n"
                 total += o.prix
+            s += "</font></pre>\n"
 
-        s += "\n\n\n\nTotal \n -------------------------------------------------------------------\n\t\t\t" + str(total) + "€"
+        s += "<hr><b>Total</b> \n<pre><font face='"+font+"'>\t\t\t" + str(total) + "€</font></pre>"
 
-        self.textEdit.setText(s)
+        self.textEdit.setHtml(s)
         self.textEdit.adjustSize()
         btn = QPushButton('Payer', self)
         btn.resize(50, 50)
@@ -162,29 +167,34 @@ class MyMainWindow(QMainWindow):
 
     ###############################################
 
-    def orders(self): #FIXME signal pour quand on appuie sur le bouton "commandes"
+    def orders(self): 
         self.stack.setCurrentWidget(self.orders_widget)
         deleteItemsOfLayout(self.layout_order)
         for k in self.all_commandes:
             obj2 = QVBoxLayout()
-            self.textEdit = QTextEdit(self)
+            self.textEdit = QTextEdit()
             self.textEdit.setContentsMargins(0,0,0,0)
             s = ""
+            font = "helvetica"
             if k.menus:  # Je rassemble tous les plats et les boissons pour que ce soit plus lisible
                 for i in k.menus:
                     for j in i.plats:
                         k.plats.append(j)
                     k.boissons.append(i.boisson)
             k.menus = None
-            s += "Boissons \n ----------------------------------\n"
+            s += "<b>Boissons</b> \n"
             if k.boissons:
+                s += "<pre><font face='"+font+"'>"
                 for n in k.boissons:
                     s+= n.nom + "\n"
-            s += "\n\nPlats \n ----------------------------------\n"
+                s += "</font></pre>"
+            s += "<b>Plats</b> \n"
             if k.plats:
+                s += "<pre><font face='"+font+"'>"
                 for m in k.plats:
                     s += m.nom + "\n"
-            self.textEdit.setText(s)
+                s += "</font></pre>"
+            self.textEdit.setHtml(s)
             self.textEdit.adjustSize()
             btn = QPushButton('Terminer', self)
             btn.resize(50, 50)
@@ -194,7 +204,7 @@ class MyMainWindow(QMainWindow):
             self.layout_order.addLayout(obj2)
     ###############################################
 
-    def change_tab(self, tab_num): #FIXME signal pour le changement de focus dans l'onglet Menus
+    def change_tab(self, tab_num): 
         # tab_num = 1 (menus), 2 (boissons), 3 (plats) ou 4 (plats du jour)
         if tab_num == 1:
             deleteItemsOfLayout(self.menu_layout)
