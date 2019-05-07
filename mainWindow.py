@@ -5,6 +5,9 @@ from classes import *
 from copy import deepcopy
 import sys
 import glob, os
+import dessin
+import modif_chaises
+import dessin_modif
 
 class MyMainWindow(QMainWindow):
 
@@ -22,6 +25,14 @@ class MyMainWindow(QMainWindow):
         coca = Boisson("Coca",1,[],[],"",False,25)
         pepsi = Boisson("Pepsi",1,[],[],"",False,25)
         m = Menu("Kebab_Frites",[kebab, frite],coca,6.5)
+        self.taille_restau = [30, 30]
+        self.liste_tables = [[(1,1),(2,1),(1,2),(2,2)], [(5,5),(5,6),(5,7),(6,5),(6,6),(6,7)]]
+        self.liste_chaises = [(0,1),(0,2),(3,1),(3,2),(5,4),(6,4),(4,5),(4,6),(4,7),(7,5),(7,6),(7,7),(5,8),(6,8)]
+        self.X = 0
+        self.Y = 0
+        self.dessin = None
+        self.obj2 = QVBoxLayout()
+        self.formTables = None
         self.commande = Commande([m], [poulet, crevette], [pepsi], None)  # Commande pour tester
         self.all_commandes = [self.commande, deepcopy(self.commande), deepcopy(self.commande)]
         self.vue = "Plats"
@@ -63,15 +74,14 @@ class MyMainWindow(QMainWindow):
         self.setCentralWidget(self.stack)
 
         # Adding all views to the stack
-        self.home_widget = QTextEdit()
-        self.home_widget.setText("Home")
+        self.home_widget = QWidget()
+        self.home_layout = QHBoxLayout(self.home_widget)
         self.stack.addWidget(self.home_widget)
 
         # A list of menus. There are 4 tabs: Menus, drinks, meals and daily offers
         self.menu_widget = QTabWidget()
         self.menu_widget.setMovable(False)
         self.menu_widget.setTabPosition(QTabWidget.West)
-        self.menu_widget.currentChanged.connect(self.change_tab)
         self.menu_widget.setIconSize(QSize(82, 82))
         ###
         self.menus_widget = QWidget()
@@ -90,6 +100,8 @@ class MyMainWindow(QMainWindow):
         self.menu_widget.addTab(self.platsDuJour_widget, QIcon("Icons/date.png"), "")
         self.plats_du_jour_layout = QVBoxLayout(self.platsDuJour_widget)
         ###
+        self.change_tab(0)      # effectively displays the first tab
+        self.menu_widget.currentChanged.connect(self.change_tab)
         self.stack.addWidget(self.menu_widget)
 
         # A list of all current orders
@@ -110,11 +122,174 @@ class MyMainWindow(QMainWindow):
         self.edit_home_widget = QWidget()
         #TODO ??? still left to do (Eve)
         self.stack.addWidget(self.edit_home_widget)
+        
+        self.home()
 
     ###############################################
 
-    def home(self): #TODO signal quand on appuie sur le bouton home
+    def home(self):
         self.stack.setCurrentWidget(self.home_widget)
+        deleteItemsOfLayout(self.home_layout)
+        self.grid = QGridLayout()
+        self.modifchaises = modif_chaises.Modif()
+        self.grid.addWidget(self.modifchaises,0,0)
+        bouttonPlus = QPushButton("+")
+        bouttonPlus.resize(100,32)
+        self.grid.addWidget(bouttonPlus,0,1)
+        bouttonPlus.clicked.connect(self.ajouterChaises)
+        bouttonMoins = QPushButton("-")
+        bouttonMoins.resize(100,32)
+        self.grid.addWidget(bouttonMoins,0,2)
+        bouttonMoins.clicked.connect(self.retirerChaises)
+        #partie pour les tables
+        self.Nomtables = QLabel("Nombre de tables:")
+        self.Nomtables.setAlignment(Qt.AlignCenter)
+        self.grid.addWidget(self.Nomtables, 1, 0, 1, 2)
+        self.formTables = QSpinBox()
+        self.grid.addWidget(self.formTables, 1, 2)
+        self.formTables.valueChanged.connect(self.modifTables)
+        self.obj2.addLayout(self.grid)
+        self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+        self.obj2.addWidget(self.dessin)
+        self.home_layout.addLayout(self.obj2)
+        
+   ###############################################
+
+    def modifTables(self):
+        nbTables = self.formTables.value()
+        table = self.trouverTable()
+        tab = []
+        if table == None and nbTables%2 == 0:
+            a = self.X//10
+            b = self.Y//10
+            for i in range(0, 2):
+                for j in range(0, nbTables//2):
+                    tab.append((i+a, j+b))
+        if len(tab) > 0:
+            self.liste_tables.append(tab)
+            self.dessin.deleteLater()
+            self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+            self.obj2.addWidget(self.dessin)
+
+
+    ###############################################
+
+    def ajouterChaises(self):
+        table = self.trouverTable()
+        a, b = table[0]
+        c, d = table[len(table)-1]
+        ajouter = False
+        print("liste")
+        print(self.liste_chaises)
+        print("okay")
+        print(c-a)
+        for i in range(0, c-a+1):
+            trouver1 = False
+            trouver2 = False
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                if (r == i+a and s == b-1) and not(ajouter):
+                    trouver1 = True
+
+                if (r == i+a and s == d+1) and not(ajouter):
+                    trouver2 = True
+            if not(trouver1) and not(ajouter):
+                self.liste_chaises.append((i+a, b-1))
+                ajouter = True
+
+            if not(trouver2) and not(ajouter):
+                self.liste_chaises.append((i+a, d+1))
+                ajouter = True
+                  
+        for i in range(0, d-b+1):
+            trouver1 = False
+            trouver2 = False
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                if (r == a-1 and s == i+b) and not(ajouter):
+                    trouver1 = True
+
+                if (r == c+1 and s == i+b) and not(ajouter):
+                    trouver2 = True
+
+            if not(trouver1) and not(ajouter): 
+                self.liste_chaises.append((a-1, i+b))
+                ajouter = True
+            
+            if not(trouver2) and not(ajouter):
+                self.liste_chaises.append((c+1, i+b))
+                ajouter = True
+                
+        self.dessin.deleteLater()
+        self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+        self.obj2.addWidget(self.dessin)
+
+
+    ###############################################
+
+    def retirerChaises(self):
+        table = self.trouverTable()
+        a, b = table[0]
+        c, d = table[len(table)-1]
+        retirer = False
+        print("liste")
+        print(self.liste_chaises)
+        for i in range(0, c-a+1):
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                if (r == i+a and s == b-1) and not(retirer):
+                    self.liste_chaises.remove((i+a, b-1))
+                    retirer = True
+                    break
+
+                if (r == i+a and s == d+1) and not(retirer):
+                    self.liste_chaises.remove((i+a, d+1))
+                    retirer = True
+                    break
+
+        for i in range(0, d-b+1):
+            for j in range(len(self.liste_chaises)):
+                r, s = self.liste_chaises[j]
+                print("okay2")
+                print(r)
+                print(s)
+                print(i+b)
+                print(a-1)
+                print(c+1)
+                if (r == a-1 and s == i+b) and not(retirer):
+                    self.liste_chaises.remove((a-1, i+b))
+                    retirer = True
+                    break
+
+                if (r == c+1 and s == i+b) and not(retirer):
+                    self.liste_chaises.remove((c+1, i+b))
+                    retirer = True
+                    break
+                
+        self.dessin.deleteLater()
+        self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
+        self.obj2.addWidget(self.dessin)
+
+    ###############################################
+
+    def modifXY(self, x, y):
+        self.X = x
+        self.Y = y
+        print("XY")
+        print(self.X)
+        print(self.Y)
+        print(self.trouverTable())
+
+    ###############################################
+
+    def trouverTable(self):
+        nb_tables = len(self.liste_tables)
+        for i in range(nb_tables):
+            nb_rect = len(self.liste_tables[i])
+            a, b = self.liste_tables[i][0]
+            c, d = self.liste_tables[i][nb_rect-1]
+            if self.X >= a*10 and self.X <= (c+1)*10 and self.Y >= b*10 and self.Y <= (d+1)*10:
+                return self.liste_tables[i]
 
     ###############################################
 
@@ -206,7 +381,7 @@ class MyMainWindow(QMainWindow):
 
     def change_tab(self, tab_num): 
         # tab_num = 1 (menus), 2 (boissons), 3 (plats) ou 4 (plats du jour)
-        if tab_num == 1:
+        if tab_num == 0:
             deleteItemsOfLayout(self.menu_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
@@ -219,7 +394,7 @@ class MyMainWindow(QMainWindow):
                 t.setPlainText(''.join(map(str, txt)))
                 self.menu_layout.addWidget(t)
                 self.menu_layout.addWidget(btn)
-        elif tab_num == 2:
+        elif tab_num == 1:
             deleteItemsOfLayout(self.boisson_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Boisson_*.txt')):
@@ -232,7 +407,7 @@ class MyMainWindow(QMainWindow):
                 t.setPlainText(''.join(map(str, txt)))
                 self.boisson_layout.addWidget(t)
                 self.boisson_layout.addWidget(btn)
-        elif tab_num == 3:
+        elif tab_num == 2:
             deleteItemsOfLayout(self.plats_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
@@ -246,7 +421,7 @@ class MyMainWindow(QMainWindow):
                 self.plats_layout.addWidget(t)
                 self.plats_layout.addWidget(btn)
 
-        elif tab_num == 4:
+        elif tab_num == 3:
             deleteItemsOfLayout(self.plats_du_jour_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
