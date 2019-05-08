@@ -1,0 +1,4 @@
+Nom Nom_de_la_boisson
+Prix 0€
+Alcool True
+Contenance 33cL

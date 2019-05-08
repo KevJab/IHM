@@ -1,6 +1,6 @@
 Nom Kebab_Frites
-Prix 6.5
-Plat ['Kebab']
-Boisson True
+Prix 6.5€
+Description Sandwich_à_base_de_viande_de_mouton,salade,tomates,oignons,accompagné_de_frites
+Allergenes gluten,soja
 Vegan False
 Epice False

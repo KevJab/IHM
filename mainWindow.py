@@ -377,47 +377,52 @@ class MyMainWindow(QMainWindow):
             obj2.addWidget(self.textEdit)
             obj2.addWidget(btn)
             self.layout_order.addLayout(obj2)
+            
     ###############################################
 
     def change_tab(self, tab_num): 
         # tab_num = 1 (menus), 2 (boissons), 3 (plats) ou 4 (plats du jour)
+        html_text = "<head><style>table{ float: left;} \ntable + table {float: right;}</style></head>\n<body>"
         if tab_num == 0:
             deleteItemsOfLayout(self.menu_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
-                f = open(txt_file, "r")
-                txt = f.readlines()
+                menu_text = self.display_food(txt_file)
                 t = QTextEdit(self)
+                t.setReadOnly(True)
                 btn = QPushButton('Ajouter', self)
                 btn.resize(50, 50)
                 btn.setStyleSheet("background-color: green;")
-                t.setPlainText(''.join(map(str, txt)))
+                menu_text = html_text + menu_text + "</body>"
+                t.setHtml(menu_text)
                 self.menu_layout.addWidget(t)
                 self.menu_layout.addWidget(btn)
         elif tab_num == 1:
             deleteItemsOfLayout(self.boisson_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Boisson_*.txt')):
-                f = open(txt_file, "r")
-                txt = f.readlines()
+                boisson_text = self.display_drink(txt_file)
                 t = QTextEdit(self)
+                t.setReadOnly(True)
                 btn = QPushButton('Ajouter', self)
                 btn.resize(50, 50)
                 btn.setStyleSheet("background-color: green;")
-                t.setPlainText(''.join(map(str, txt)))
+                boisson_text = html_text + boisson_text + "</body>"
+                t.setHtml(boisson_text)
                 self.boisson_layout.addWidget(t)
                 self.boisson_layout.addWidget(btn)
         elif tab_num == 2:
             deleteItemsOfLayout(self.plats_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
-                f = open(txt_file, "r")
-                txt = f.readlines()
+                #plat_text = self.display_food(txt_file)
                 t = QTextEdit(self)
+                t.setReadOnly(True)
                 btn = QPushButton('Ajouter', self)
                 btn.resize(50, 50)
                 btn.setStyleSheet("background-color: green;")
-                t.setPlainText(''.join(map(str, txt)))
+                #plat_text = html_text + plat_text + "</body>"
+                #t.setHtml(plat_text)
                 self.plats_layout.addWidget(t)
                 self.plats_layout.addWidget(btn)
 
@@ -428,13 +433,84 @@ class MyMainWindow(QMainWindow):
                 f = open(txt_file, "r")
                 txt = f.readlines()
                 t = QTextEdit(self)
+                t.setReadOnly(True)
                 btn = QPushButton('Ajouter', self)
                 btn.resize(50, 50)
                 btn.setStyleSheet("background-color: green;")
-                t.setPlainText(''.join(map(str, txt)))
+                html_text += "</body>"
+                t.setHtml(html_text)
                 self.plats_du_jour_layout.addWidget(t)
                 self.plats_du_jour_layout.addWidget(btn)
+            
+    ###############################################
 
+    def display_food(self, filename):
+        f = open(filename, "r")
+        info = {}
+        s = "<table>"
+        for line in f.readlines():
+            line = line.rstrip("\n")
+            k,v = line.split(" ")
+            
+            if k == "Nom":
+                v = " ".join(v.split("_"))
+            if k == "Vegan" or k == "Epice":
+                if v == "True":
+                    v = True
+                else :
+                    v = False
+            if k == "Description":
+                v = ", ".join(map(lambda word: " ".join(word.split("_")), v.split(",")))
+            
+            info[k] = v
+        
+        s += "<tr><td><b>"+info["Nom"]+"</b></td></tr>"
+        s += "<tr><td><i>"+info["Description"]+"</i></td></tr>"
+        
+        if info["Allergenes"] != "aucun":
+	        s += "<tr><td><small><b>Contient: "+ ", ".join(info["Allergenes"].split(",")) +"</b></small></td></tr>"
+        
+        s += "</table><table>"
+        s += "<tr><td colspan='2'><p align='right'>" + info["Prix"] + "</p></td></tr><tr></tr><tr>"
+        if info["Vegan"]:
+            s += "<td><img align='right' src='./Icons/vegan.png' width='30' height='30'></td>"
+        if info["Epice"]:
+            s += "<td><img align='right' src='./Icons/spicy_full.png' width='30' height='30'></td>"
+        
+        return s + "</tr></table>"
+    
+    def display_drink(self, filename):
+        f = open(filename, "r")
+        info = {}
+        s = "<table>"
+        for line in f.readlines():
+            line = line.rstrip("\n")
+            k,v = line.split(" ")
+            
+            if k == "Nom":
+                v = " ".join(v.split("_"))
+            if k == "Alcool":
+                if v == "True":
+                    v = True
+                else: 
+                    v = False
+            
+            info[k] = v
+        
+        s += "<tr><td><b>"+info["Nom"]+"</b></td></tr>"
+        
+        if info["Alcool"]:
+            s += "<tr><td><i>contient de l'alcool</i></td></tr>"
+        
+        s += "</table><table>"
+        s += "<tr><td><p>" + info["Prix"] + "</p></td></tr>"
+        s += "<tr><td><p>" + info["Contenance"] + "</p></td></tr>"
+        
+        return s + "</table>"
+            
+          	
+        
+    
 
 def deleteItemsOfLayout(layout):
      if layout is not None:
