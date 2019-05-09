@@ -84,21 +84,41 @@ class MyMainWindow(QMainWindow):
         self.menu_widget.setTabPosition(QTabWidget.West)
         self.menu_widget.setIconSize(QSize(82, 82))
         ###
-        self.menus_widget = QWidget()
+        self.menus_widget = QScrollArea()
         self.menu_widget.addTab(self.menus_widget, QIcon("Icons/menus.jpg"), "")
-        self.menu_layout = QVBoxLayout(self.menus_widget)
+        self.menus_page = QWidget()
+        self.menus_page.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.menus_widget.setWidget(self.menus_page)
+        self.menus_layout = QVBoxLayout()
+        self.menus_page.setLayout(self.menus_layout)
+        self.menus_widget.setWidgetResizable(True)
         ###
-        self.boissons_widget = QWidget()
+        self.boissons_widget = QScrollArea()
         self.menu_widget.addTab(self.boissons_widget, QIcon("Icons/verre.jpg"), "")
-        self.boisson_layout = QVBoxLayout(self.boissons_widget)
+        self.boissons_page = QWidget()
+        self.boissons_page.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.boissons_widget.setWidget(self.boissons_page)
+        self.boissons_layout = QVBoxLayout()
+        self.boissons_page.setLayout(self.boissons_layout)
+        self.boissons_widget.setWidgetResizable(True)
         ###
-        self.plats_widget = QWidget()
+        self.plats_widget = QScrollArea()
         self.menu_widget.addTab(self.plats_widget, QIcon("Icons/assiette_couverts.png"), "")
-        self.plats_layout = QVBoxLayout(self.plats_widget)
+        self.plats_page = QWidget()
+        self.plats_page.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.plats_widget.setWidget(self.plats_page)
+        self.plats_layout = QVBoxLayout()
+        self.plats_page.setLayout(self.plats_layout)
+        self.plats_widget.setWidgetResizable(True)
         ###
-        self.platsDuJour_widget = QWidget()
+        self.platsDuJour_widget = QScrollArea()
         self.menu_widget.addTab(self.platsDuJour_widget, QIcon("Icons/date.png"), "")
-        self.plats_du_jour_layout = QVBoxLayout(self.platsDuJour_widget)
+        self.platsDuJour_page = QWidget()
+        self.platsDuJour_page.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.platsDuJour_widget.setWidget(self.platsDuJour_page)
+        self.platsDuJour_layout = QVBoxLayout()
+        self.platsDuJour_page.setLayout(self.platsDuJour_layout)
+        self.platsDuJour_widget.setWidgetResizable(True)
         ###
         self.change_tab(0)      # effectively displays the first tab
         self.menu_widget.currentChanged.connect(self.change_tab)
@@ -384,7 +404,7 @@ class MyMainWindow(QMainWindow):
         # tab_num = 1 (menus), 2 (boissons), 3 (plats) ou 4 (plats du jour)
         html_text = "<head><style>table{ float: left;} \ntable + table {float: right;}</style></head>\n<body>"
         if tab_num == 0:
-            deleteItemsOfLayout(self.menu_layout)
+            deleteItemsOfLayout(self.menus_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
                 menu_text = self.display_food(txt_file)
@@ -395,10 +415,44 @@ class MyMainWindow(QMainWindow):
                 btn.setStyleSheet("background-color: green;")
                 menu_text = html_text + menu_text + "</body>"
                 t.setHtml(menu_text)
-                self.menu_layout.addWidget(t)
-                self.menu_layout.addWidget(btn)
+                self.menus_layout.addWidget(t)
+                self.menus_layout.addWidget(btn)
+            for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
+                menu_text = self.display_food(txt_file)
+                t = QTextEdit(self)
+                t.setReadOnly(True)
+                btn = QPushButton('Ajouter', self)
+                btn.resize(50, 50)
+                btn.setStyleSheet("background-color: green;")
+                menu_text = html_text + menu_text + "</body>"
+                t.setHtml(menu_text)
+                self.menus_layout.addWidget(t)
+                self.menus_layout.addWidget(btn)
+            for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
+                menu_text = self.display_food(txt_file)
+                t = QTextEdit(self)
+                t.setReadOnly(True)
+                btn = QPushButton('Ajouter', self)
+                btn.resize(50, 50)
+                btn.setStyleSheet("background-color: green;")
+                menu_text = html_text + menu_text + "</body>"
+                t.setHtml(menu_text)
+                self.menus_layout.addWidget(t)
+                self.menus_layout.addWidget(btn)
+            for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
+                menu_text = self.display_food(txt_file)
+                t = QTextEdit(self)
+                t.setReadOnly(True)
+                btn = QPushButton('Ajouter', self)
+                btn.resize(50, 50)
+                btn.setStyleSheet("background-color: green;")
+                menu_text = html_text + menu_text + "</body>"
+                t.setHtml(menu_text)
+                self.menus_layout.addWidget(t)
+                self.menus_layout.addWidget(btn)
+            
         elif tab_num == 1:
-            deleteItemsOfLayout(self.boisson_layout)
+            deleteItemsOfLayout(self.boissons_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Boisson_*.txt')):
                 boisson_text = self.display_drink(txt_file)
@@ -409,8 +463,8 @@ class MyMainWindow(QMainWindow):
                 btn.setStyleSheet("background-color: green;")
                 boisson_text = html_text + boisson_text + "</body>"
                 t.setHtml(boisson_text)
-                self.boisson_layout.addWidget(t)
-                self.boisson_layout.addWidget(btn)
+                self.boissons_layout.addWidget(t)
+                self.boissons_layout.addWidget(btn)
         elif tab_num == 2:
             deleteItemsOfLayout(self.plats_layout)
             parent_dir = 'Conso'
@@ -427,7 +481,7 @@ class MyMainWindow(QMainWindow):
                 self.plats_layout.addWidget(btn)
 
         elif tab_num == 3:
-            deleteItemsOfLayout(self.plats_du_jour_layout)
+            deleteItemsOfLayout(self.platsDuJour_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
                 f = open(txt_file, "r")
@@ -439,8 +493,8 @@ class MyMainWindow(QMainWindow):
                 btn.setStyleSheet("background-color: green;")
                 html_text += "</body>"
                 t.setHtml(html_text)
-                self.plats_du_jour_layout.addWidget(t)
-                self.plats_du_jour_layout.addWidget(btn)
+                self.platsDuJour_layout.addWidget(t)
+                self.platsDuJour_layout.addWidget(btn)
             
     ###############################################
 
@@ -473,9 +527,9 @@ class MyMainWindow(QMainWindow):
         s += "</table><table>"
         s += "<tr><td colspan='2'><p align='right'>" + info["Prix"] + "</p></td></tr><tr></tr><tr>"
         if info["Vegan"]:
-            s += "<td><img align='right' src='./Icons/vegan.png' width='30' height='30'></td>"
+            s += "<td><img src='./Icons/vegan.png' width='30' height='30'></td>"
         if info["Epice"]:
-            s += "<td><img align='right' src='./Icons/spicy_full.png' width='30' height='30'></td>"
+            s += "<td><img src='./Icons/spicy_full.png' width='30' height='30'></td>"
         
         return s + "</tr></table>"
     
