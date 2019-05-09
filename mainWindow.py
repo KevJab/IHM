@@ -13,8 +13,9 @@ class MyMainWindow(QMainWindow):
 
     def __init__(self, parent = None):
         QMainWindow.__init__(self, parent)
-
+        self.activeCommande = 0
         self.commande = Commande(None, None, None, None)
+        self.lienTableCommande = dict()
         """
         COMMANDE POUR TEST
         """
@@ -33,8 +34,10 @@ class MyMainWindow(QMainWindow):
         self.dessin = None
         self.obj2 = QVBoxLayout()
         self.formTables = None
-        self.commande = Commande([m], [poulet, crevette], [pepsi], None)  # Commande pour tester
-        self.all_commandes = [self.commande, deepcopy(self.commande), deepcopy(self.commande)]
+        self.commande = Commande([m], [poulet, crevette], [pepsi], [])  # Commande pour tester
+        self.all_commandes = [self.commande, deepcopy(self.commande)]
+        self.lienTableCommande[0]=self.all_commandes[0]
+        self.lienTableCommande[1]=self.all_commandes[1]
         self.vue = "Plats"
 
         self.resize(800, 500)
@@ -176,6 +179,10 @@ class MyMainWindow(QMainWindow):
    ###############################################
 
     def modifTables(self):
+        if(self.trouverTable()!=None):
+            print("Selection table :")
+            print(self.liste_tables.index(self.trouverTable()))
+            self.selectionTable(self.liste_tables.index(self.trouverTable()))
         nbTables = self.formTables.value()
         table = self.trouverTable()
         tab = []
@@ -186,6 +193,9 @@ class MyMainWindow(QMainWindow):
                 for j in range(0, nbTables//2):
                     tab.append((i+a, j+b))
         if len(tab) > 0:
+            for i in range(len(self.liste_tables),len(tab)):
+                print("Ajout commande")
+                self.addCommande(i)
             self.liste_tables.append(tab)
             self.dessin.deleteLater()
             self.dessin = dessin_modif.Modif(self.taille_restau, self.liste_tables, self.liste_chaises, self)
@@ -321,7 +331,6 @@ class MyMainWindow(QMainWindow):
     def payment(self): 
         self.stack.setCurrentWidget(self.payment_widget)
         deleteItemsOfLayout(self.payment_layout)
-
         self.textEdit = QTextEdit()
         self.textEdit.setContentsMargins(0,0,0,0)
         s = ""
@@ -329,25 +338,25 @@ class MyMainWindow(QMainWindow):
         font = "helvetica"
 
         s += "<b>Boissons</b>\n"
-        if self.commande.boissons:
+        if self.all_commandes[self.activeCommande].boissons:
             s += "<pre><font face='"+font+"'>"
-            for n in self.commande.boissons:
+            for n in self.all_commandes[self.activeCommande].boissons:
                 s+= n.nom + "\t\t\t" + str(n.prix) + "€\n"
-                total += n.prix
+                total += float(n.prix)
             s += "</font></pre> <br>\n"
         s += "<b>Plats</b>\n"
-        if self.commande.plats:
+        if self.all_commandes[self.activeCommande].plats:
             s += "<pre><font face='"+font+"'>"
-            for m in self.commande.plats:
+            for m in self.all_commandes[self.activeCommande].plats:
                 s += m.nom + "\t\t\t" + str(m.prix) + "€\n"
-                total += m.prix
+                total += float(m.prix)
             s += "</font></pre> <br>\n"
         s += "<b>Menus</b>\n"
-        if self.commande.menus:
+        if self.all_commandes[self.activeCommande].menus:
             s += "<pre><font face='"+font+"'>"
-            for o in self.commande.menus:
+            for o in self.all_commandes[self.activeCommande].menus:
                 s += o.nom + "\t\t" + str(o.prix) + "€\n"
-                total += o.prix
+                total += float(o.prix)
             s += "</font></pre>\n"
 
         s += "<hr><b>Total</b> \n<pre><font face='"+font+"'>\t\t\t" + str(total) + "€</font></pre>"
@@ -359,127 +368,111 @@ class MyMainWindow(QMainWindow):
         btn.setStyleSheet("background-color: yellow;")
         self.payment_layout.addWidget(self.textEdit)
         self.payment_layout.addWidget(btn)
+        btn.clicked.connect(lambda: self.delCommande(self.activeCommande,True))
 
     ###############################################
 
     def orders(self): 
         self.stack.setCurrentWidget(self.orders_widget)
         deleteItemsOfLayout(self.layout_order)
-        for k in self.all_commandes:
+        btn= []
+        for k in range(0,len(self.all_commandes)):
             obj2 = QVBoxLayout()
             self.textEdit = QTextEdit()
             self.textEdit.setContentsMargins(0,0,0,0)
             s = ""
             font = "helvetica"
-            if k.menus:  # Je rassemble tous les plats et les boissons pour que ce soit plus lisible
-                for i in k.menus:
+            if self.all_commandes[k].menus:  # Je rassemble tous les plats et les boissons pour que ce soit plus lisible
+                for i in self.all_commandes[k].menus:
                     for j in i.plats:
-                        k.plats.append(j)
-                    k.boissons.append(i.boisson)
-            k.menus = None
+                        self.all_commandes[k].plats.append(j)
+                    self.all_commandes[k].boissons.append(i.boisson)
+            self.all_commandes[k].menus = None
             s += "<b>Boissons</b> \n"
-            if k.boissons:
+            if self.all_commandes[k].boissons:
                 s += "<pre><font face='"+font+"'>"
-                for n in k.boissons:
+                for n in self.all_commandes[k].boissons:
                     s+= n.nom + "\n"
                 s += "</font></pre>"
             s += "<b>Plats</b> \n"
-            if k.plats:
+            if self.all_commandes[k].plats:
                 s += "<pre><font face='"+font+"'>"
-                for m in k.plats:
+                for m in self.all_commandes[k].plats:
                     s += m.nom + "\n"
                 s += "</font></pre>"
             self.textEdit.setHtml(s)
             self.textEdit.adjustSize()
-            btn = QPushButton('Terminer', self)
-            btn.resize(50, 50)
-            btn.setStyleSheet("background-color: red;")
+            btn.append((QPushButton('Terminer', self),k))
+            btn[len(btn)-1][0].resize(50, 50)
+            btn[len(btn)-1][0].setStyleSheet("background-color: red;")
             obj2.addWidget(self.textEdit)
-            obj2.addWidget(btn)
+            obj2.addWidget(btn[len(btn)-1][0])
             self.layout_order.addLayout(obj2)
+        
+        for button in btn:
+            button[0].clicked.connect(lambda _, b=button[1]: self.delCommande(button[1],True))
             
     ###############################################
 
     def change_tab(self, tab_num): 
-        # tab_num = 1 (menus), 2 (boissons), 3 (plats) ou 4 (plats du jour)
+        # tab_num = 0 (menus), 1 (boissons), 2 (plats) ou 3 (plats du jour)
         html_text = "<head><style>table{ float: left;} \ntable + table {float: right;}</style></head>\n<body>"
+        btn = []
         if tab_num == 0:
             deleteItemsOfLayout(self.menus_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
                 menu_text = self.display_food(txt_file)
+                menu=readMenu(txt_file)
                 t = QTextEdit(self)
                 t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
+                btn.append((QPushButton('Ajouter', self),menu))
+                btn[len(btn)-1][0].resize(50, 50)
+                btn[len(btn)-1][0].setStyleSheet("background-color: green;")
                 menu_text = html_text + menu_text + "</body>"
                 t.setHtml(menu_text)
                 self.menus_layout.addWidget(t)
-                self.menus_layout.addWidget(btn)
-            for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
-                menu_text = self.display_food(txt_file)
-                t = QTextEdit(self)
-                t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
-                menu_text = html_text + menu_text + "</body>"
-                t.setHtml(menu_text)
-                self.menus_layout.addWidget(t)
-                self.menus_layout.addWidget(btn)
-            for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
-                menu_text = self.display_food(txt_file)
-                t = QTextEdit(self)
-                t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
-                menu_text = html_text + menu_text + "</body>"
-                t.setHtml(menu_text)
-                self.menus_layout.addWidget(t)
-                self.menus_layout.addWidget(btn)
-            for txt_file in glob.glob(os.path.join(parent_dir, 'Menu_*.txt')):
-                menu_text = self.display_food(txt_file)
-                t = QTextEdit(self)
-                t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
-                menu_text = html_text + menu_text + "</body>"
-                t.setHtml(menu_text)
-                self.menus_layout.addWidget(t)
-                self.menus_layout.addWidget(btn)
+                self.menus_layout.addWidget(btn[len(btn)-1][0])
+            for button in btn:
+                button[0].clicked.connect(lambda _, b=button[1]: self.addMenuToCommande(b))
+            
             
         elif tab_num == 1:
             deleteItemsOfLayout(self.boissons_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Boisson_*.txt')):
                 boisson_text = self.display_drink(txt_file)
+                boisson=readBoisson(txt_file)
                 t = QTextEdit(self)
                 t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
+                btn.append((QPushButton('Ajouter', self),boisson))
+                btn[len(btn)-1][0].resize(50, 50)
+                btn[len(btn)-1][0].setStyleSheet("background-color: green;")
                 boisson_text = html_text + boisson_text + "</body>"
                 t.setHtml(boisson_text)
                 self.boissons_layout.addWidget(t)
-                self.boissons_layout.addWidget(btn)
+                self.boissons_layout.addWidget(btn[len(btn)-1][0])
+            for button in btn:
+                button[0].clicked.connect(lambda _, b=button[1]: self.addBoissonToCommande(b))
         elif tab_num == 2:
             deleteItemsOfLayout(self.plats_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
                 #plat_text = self.display_food(txt_file)
+                plat = readPlat(txt_file)
                 t = QTextEdit(self)
                 t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
+                btn.append((QPushButton('Ajouter', self),plat))
+                btn[len(btn)-1][0].resize(50, 50)
+                btn[len(btn)-1][0].setStyleSheet("background-color: green;")
                 #plat_text = html_text + plat_text + "</body>"
                 #t.setHtml(plat_text)
                 self.plats_layout.addWidget(t)
-                self.plats_layout.addWidget(btn)
+                self.plats_layout.addWidget(btn[len(btn)-1][0])
 
+
+            for button in btn:
+                button[0].clicked.connect(lambda _, b=button[1]: self.addPlatToCommande(b))
         elif tab_num == 3:
             deleteItemsOfLayout(self.platsDuJour_layout)
             parent_dir = 'Conso'
@@ -494,10 +487,57 @@ class MyMainWindow(QMainWindow):
                 html_text += "</body>"
                 t.setHtml(html_text)
                 self.platsDuJour_layout.addWidget(t)
-                self.platsDuJour_layout.addWidget(btn)
+                self.platsDuJour_layout.addWidget(btn[len(btn)-1][0])
             
     ###############################################
 
+    def selectionTable(self,idTable):
+        self.activeCommande = idTable
+        if(not(idTable in self.lienTableCommande.keys())):
+            self.addCommande(idTable)
+        elif(self.lienTableCommande[idTable]==None):
+            self.addCommande(idTable)
+        self.menus()
+
+    ###############################################
+
+    def addPlatToCommande(self,plat):
+        if(self.activeCommande != -1):
+            print("plat")
+            print(plat.nom)
+            self.all_commandes[self.activeCommande].addPlat(plat)
+
+    def addMenuToCommande(self,menu):
+        if(self.activeCommande != -1):
+            print("menu")
+            print(menu.nom)
+            self.all_commandes[self.activeCommande].addMenu(menu)
+    
+    def addBoissonToCommande(self,boisson):
+        if(self.activeCommande != -1):
+            print("boisson")
+            print(boisson.nom)
+            self.all_commandes[self.activeCommande].addBoisson(boisson)
+
+    ###############################################
+    
+    def delCommande(self,id,returnOrders):
+        self.lienTableCommande[id] = None
+        del self.all_commandes[id]
+        if(returnOrders):
+            self.orders()
+        if(len(self.all_commandes) <= 0):
+            self.payment_action.setEnabled(False)
+
+    ###############################################
+
+    def addCommande(self,idTable):
+
+        self.payment_action.setEnabled(True)
+        self.all_commandes.append(Commande([],[],[],idTable))
+        self.lienTableCommande[idTable] = self.all_commandes[len(self.all_commandes)-1]
+
+    ###############################################
     def display_food(self, filename):
         f = open(filename, "r")
         info = {}

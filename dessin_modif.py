@@ -19,6 +19,7 @@ class Modif(QWidget):
         self.X = 0
         self.Y = 0
         self.fenetre = fenetre
+        self.activeTable = -1
         
 
     def paintEvent(self, event):
