@@ -1,4 +1,4 @@
-Nom Coca
-Prix 1
+Nom Eau
+Prix 0
 Alcool False
 Contenance 25cL

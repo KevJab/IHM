@@ -14,7 +14,6 @@ class MyMainWindow(QMainWindow):
     def __init__(self, parent = None):
         QMainWindow.__init__(self, parent)
         self.activeCommande = 0
-        self.commande = Commande(None, None, None, None)
         self.lienTableCommande = dict()
         """
         COMMANDE POUR TEST
@@ -303,6 +302,10 @@ class MyMainWindow(QMainWindow):
     ###############################################
 
     def modifXY(self, x, y):
+        if(self.trouverTable()!=None):
+            print("Selection table :")
+            print(self.liste_tables.index(self.trouverTable()))
+            self.selectionTable(self.liste_tables.index(self.trouverTable()))
         self.X = x
         self.Y = y
         print("XY")
@@ -341,21 +344,24 @@ class MyMainWindow(QMainWindow):
         if self.all_commandes[self.activeCommande].boissons:
             s += "<pre><font face='"+font+"'>"
             for n in self.all_commandes[self.activeCommande].boissons:
-                s+= n.nom + "\t\t\t" + str(n.prix) + "€\n"
-                total += float(n.prix)
+                if(n!= None):
+                    s+= n.nom + "\t\t\t" + str(n.prix) + "€\n"
+                    total += float(n.prix)
             s += "</font></pre> <br>\n"
         s += "<b>Plats</b>\n"
         if self.all_commandes[self.activeCommande].plats:
             s += "<pre><font face='"+font+"'>"
             for m in self.all_commandes[self.activeCommande].plats:
-                s += m.nom + "\t\t\t" + str(m.prix) + "€\n"
+                if(m!= None):
+                    s += m.nom + "\t\t\t" + str(m.prix) + "€\n"
                 total += float(m.prix)
             s += "</font></pre> <br>\n"
         s += "<b>Menus</b>\n"
         if self.all_commandes[self.activeCommande].menus:
             s += "<pre><font face='"+font+"'>"
             for o in self.all_commandes[self.activeCommande].menus:
-                s += o.nom + "\t\t" + str(o.prix) + "€\n"
+                if(o!= None):
+                    s += o.nom + "\t\t" + str(o.prix) + "€\n"
                 total += float(o.prix)
             s += "</font></pre>\n"
 
@@ -392,13 +398,15 @@ class MyMainWindow(QMainWindow):
             if self.all_commandes[k].boissons:
                 s += "<pre><font face='"+font+"'>"
                 for n in self.all_commandes[k].boissons:
-                    s+= n.nom + "\n"
+                    if(n!= None):
+                        s+= n.nom + "\n"
                 s += "</font></pre>"
             s += "<b>Plats</b> \n"
             if self.all_commandes[k].plats:
                 s += "<pre><font face='"+font+"'>"
                 for m in self.all_commandes[k].plats:
-                    s += m.nom + "\n"
+                    if(n!= None):
+                        s += m.nom + "\n"
                 s += "</font></pre>"
             self.textEdit.setHtml(s)
             self.textEdit.adjustSize()
@@ -433,10 +441,11 @@ class MyMainWindow(QMainWindow):
                 t.setHtml(menu_text)
                 self.menus_layout.addWidget(t)
                 self.menus_layout.addWidget(btn[len(btn)-1][0])
+            
             for button in btn:
-                button[0].clicked.connect(lambda _, b=button[1]: self.addMenuToCommande(b))
-            
-            
+                if( button[1] != None):
+                    button[0].clicked.connect(lambda _, b=button[1]: self.addMenuToCommande(b))
+                        
         elif tab_num == 1:
             deleteItemsOfLayout(self.boissons_layout)
             parent_dir = 'Conso'
@@ -492,6 +501,7 @@ class MyMainWindow(QMainWindow):
     ###############################################
 
     def selectionTable(self,idTable):
+        print("Selected!")
         self.activeCommande = idTable
         if(not(idTable in self.lienTableCommande.keys())):
             self.addCommande(idTable)

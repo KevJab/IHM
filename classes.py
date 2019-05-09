@@ -353,7 +353,7 @@ def readMenu(fileName):
     plat=[]
     veg = False
     epice = False
-    boisson = False
+    boisson = None
     for l in f1:
         if("\n" in l):
             l = l[:-1]
@@ -367,7 +367,11 @@ def readMenu(fileName):
         if(mots[0] == "Epice"):
             epice = (mots[1]=="True")
         if(mots[0] == "Boisson"):
-            boisson = (mots[1]=="True")
+            c = readBoisson(i)
+            if(c!= None):
+                boisson = c
+            else:
+                boisson = readBoisson("Eau")
         if(mots[0] == "Plat"):
             if("\n" in mots[1]):
                 mots[1] = mots[1][:-1]
