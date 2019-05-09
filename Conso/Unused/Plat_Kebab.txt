@@ -1,0 +1,7 @@
+Nom Kebab
+Prix 6
+Composants ['Viande_Mouton', 'Salade', 'Tomate', 'Oignon']
+Parametre []
+Vegan False
+Epice False
+Accompagnements ['Frite']

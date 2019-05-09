@@ -1,4 +1,4 @@
-Nom Coca-Cola
+Nom Pepsi
 Prix 1
 Alcool False
 Contenance 25cL

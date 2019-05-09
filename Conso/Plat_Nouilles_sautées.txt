@@ -1,0 +1,6 @@
+Nom Nouilles_sautées
+Prix 5
+Description Nouilles_chinoises_sautées,boeuf,sauce_soja,légumes
+Allergenes aucun
+Vegan False
+Epice False

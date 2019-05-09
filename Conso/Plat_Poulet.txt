@@ -1,0 +1,6 @@
+Nom Poulet
+Prix 1
+Description Nuggets_de_poulet
+Allergenes aucun
+Vegan False
+Epice False

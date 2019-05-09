@@ -361,7 +361,7 @@ class MyMainWindow(QMainWindow):
             s += "<pre><font face='"+font+"'>"
             for o in self.all_commandes[self.activeCommande].menus:
                 if(o!= None):
-                    s += o.nom + "\t\t" + str(o.prix) + "€\n"
+                    s += o.nom + "\t\t\t" + str(o.prix) + "€\n"
                 total += float(o.prix)
             s += "</font></pre>\n"
 
@@ -467,15 +467,15 @@ class MyMainWindow(QMainWindow):
             deleteItemsOfLayout(self.plats_layout)
             parent_dir = 'Conso'
             for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
-                #plat_text = self.display_food(txt_file)
+                plat_text = self.display_food(txt_file)
                 plat = readPlat(txt_file)
                 t = QTextEdit(self)
                 t.setReadOnly(True)
                 btn.append((QPushButton('Ajouter', self),plat))
                 btn[len(btn)-1][0].resize(50, 50)
                 btn[len(btn)-1][0].setStyleSheet("background-color: green;")
-                #plat_text = html_text + plat_text + "</body>"
-                #t.setHtml(plat_text)
+                plat_text = html_text + plat_text + "</body>"
+                t.setHtml(plat_text)
                 self.plats_layout.addWidget(t)
                 self.plats_layout.addWidget(btn[len(btn)-1][0])
 
@@ -485,18 +485,16 @@ class MyMainWindow(QMainWindow):
         elif tab_num == 3:
             deleteItemsOfLayout(self.platsDuJour_layout)
             parent_dir = 'Conso'
-            for txt_file in glob.glob(os.path.join(parent_dir, 'Plat_*.txt')):
-                f = open(txt_file, "r")
-                txt = f.readlines()
-                t = QTextEdit(self)
-                t.setReadOnly(True)
-                btn = QPushButton('Ajouter', self)
-                btn.resize(50, 50)
-                btn.setStyleSheet("background-color: green;")
-                html_text += "</body>"
-                t.setHtml(html_text)
-                self.platsDuJour_layout.addWidget(t)
-                self.platsDuJour_layout.addWidget(btn[len(btn)-1][0])
+            platDuJour_text = self.display_daily(1)
+            t = QTextEdit(self)
+            t.setReadOnly(True)
+            platDuJour_text = html_text + platDuJour_text + "</body>"
+            t.setHtml(platDuJour_text)
+            self.platsDuJour_layout.addWidget(t)     
+            btn.append((QPushButton('Ajouter', self),None))
+            btn[len(btn)-1][0].resize(50, 50)
+            btn[len(btn)-1][0].setStyleSheet("background-color: green;")
+            self.platsDuJour_layout.addWidget(btn[len(btn)-1][0])
             
     ###############################################
 
@@ -572,10 +570,10 @@ class MyMainWindow(QMainWindow):
         s += "<tr><td><i>"+info["Description"]+"</i></td></tr>"
         
         if info["Allergenes"] != "aucun":
-	        s += "<tr><td><small><b>Contient: "+ ", ".join(info["Allergenes"].split(",")) +"</b></small></td></tr>"
+            s += "<tr><td><small><b>Contient: "+ ", ".join(info["Allergenes"].split(",")) +"</b></small></td></tr>"
         
         s += "</table><table>"
-        s += "<tr><td colspan='2'><p align='right'>" + info["Prix"] + "</p></td></tr><tr></tr><tr>"
+        s += "<tr><td colspan='2'><p align='right'>" + info["Prix"] + "€</p></td></tr><tr></tr><tr>"
         if info["Vegan"]:
             s += "<td><img src='./Icons/vegan.png' width='30' height='30'></td>"
         if info["Epice"]:
@@ -607,12 +605,109 @@ class MyMainWindow(QMainWindow):
             s += "<tr><td><i>contient de l'alcool</i></td></tr>"
         
         s += "</table><table>"
-        s += "<tr><td><p>" + info["Prix"] + "</p></td></tr>"
+        s += "<tr><td><p>" + info["Prix"] + "€</p></td></tr>"
         s += "<tr><td><p>" + info["Contenance"] + "</p></td></tr>"
         
         return s + "</table>"
+    
+    def display_daily(self, day_num):
+        #if(day_num == 1|2|3|4|5|6|7):
+        entree = open("Conso/Plat_Crevette.txt", "r")
+        plat = open("Conso/Plat_Nouilles_sautées.txt", "r")
+        dessert = open("Conso/Plat_Perles_coco.txt", "r")
+        
+        info = {}
+        
+        for line in entree.readlines():
+            line = line.rstrip("\n")
+            k,v = line.split(" ")
             
-          	
+            if k == "Nom":
+                v = " ".join(v.split("_"))
+                info["Entree"] = v
+                
+            if k == "Vegan" or k == "Epice":
+                if v == "True":
+                    v = True
+                else :
+                    v = False
+                info[k] = v
+            if k == "Allergenes":
+                info[k] = set(v.split(","))
+                info[k].discard("aucun")
+        
+        for line in plat.readlines():
+            line = line.rstrip("\n")
+            k,v = line.split(" ")
+            
+            if k == "Nom":
+                v = " ".join(v.split("_"))
+                info["Plat"] = v
+                
+            if k == "Vegan" :
+                if v == "True":
+                    v = True
+                else :
+                    v = False
+                info["Vegan"] = info["Vegan"] and v
+            
+            if k == "Epice":
+                if v == "True":
+                    v = True
+                else :
+                    v = False
+                info["Epice"] = info["Epice"] or v
+            
+            if k == "Allergenes":
+                n = len(info[k])
+                info[k] = info[k].union(set(v.split(",")))
+                info[k].discard("aucun")
+        
+        for line in dessert.readlines():
+            line = line.rstrip("\n")
+            k,v = line.split(" ")
+            
+            if k == "Nom":
+                v = " ".join(v.split("_"))
+                info["Dessert"] = v
+            
+            if k == "Vegan":
+                if v == "True":
+                    v = True
+                else :
+                    v = False
+                info["Vegan"] = info["Vegan"] and v
+            
+            if k == "Epice":
+                if v == "True":
+                    v = True
+                else :
+                    v = False
+                info["Epice"] = info["Epice"] or v
+            
+            if k == "Allergenes":
+                info[k] = info[k].union(set(v.split(",")))
+                info[k].discard("aucun")
+          
+        
+        s = "<table>"
+        s += "<tr><td><b>Entrée: </b></td><td>"+info["Entree"]+"</td></tr>"
+        s += "<tr><td><b>Plat: </b></td><td>"+info["Plat"]+"</td></tr>"
+        s += "<tr><td><b>Dessert: </b></td><td>"+info["Dessert"]+"</td></tr>"
+        
+        if len(info["Allergenes"]) != 0:
+            s += "<tr><td><small><b>Contient: "+ ", ".join(info["Allergenes"]) +"</b></small></td></tr>"
+        
+        s += "</table><table>"
+        s += "<tr><td colspan='2'><p align='right'>8€</p></td></tr><tr></tr><tr>"
+        if info["Vegan"]:
+            s += "<td><img src='./Icons/vegan.png' width='30' height='30'></td>"
+        if info["Epice"]:
+            s += "<td><img src='./Icons/spicy_full.png' width='30' height='30'></td>"
+        
+        return s + "</tr></table>"
+            
+            
         
     
 

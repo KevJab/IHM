@@ -1,4 +1,4 @@
-Nom Coca-Cola
+Nom Fanta
 Prix 1
 Alcool False
 Contenance 25cL

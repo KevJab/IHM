@@ -1,6 +1,0 @@
-Nom nom
-Prix 12.3
-Description ingrédients
-Allergenes aucun
-Vegan True
-Epice True

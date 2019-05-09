@@ -1,7 +1,6 @@
 Nom Kebab
 Prix 6
-Composants ['Viande_Mouton', 'Salade', 'Tomate', 'Oignon']
-Parametre []
+Description Sandwich_à_base_de_viande_de_mouton,salade,tomates,oignons
+Allergenes gluten
 Vegan False
 Epice False
-Accompagnements ['Frite']

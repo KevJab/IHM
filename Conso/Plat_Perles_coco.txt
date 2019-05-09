@@ -1,0 +1,6 @@
+Nom Perles_coco
+Prix 4
+Description Boulette_de_riz_gluant_à_la_noix_de_coco
+Allergenes aucun
+Vegan True
+Epice False

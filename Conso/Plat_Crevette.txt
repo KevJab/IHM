@@ -1,0 +1,6 @@
+Nom Crevettes
+Prix 1
+Description Chips_de_crevettes
+Allergenes aucun
+Vegan False
+Epice False

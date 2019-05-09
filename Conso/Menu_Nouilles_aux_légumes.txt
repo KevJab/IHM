@@ -1,0 +1,6 @@
+Nom Nouilles_aux_légumes
+Prix 12.30
+Description Nouilles_de_riz,oignons,poivrons,sauce_pimentée
+Allergenes soja
+Vegan True
+Epice True

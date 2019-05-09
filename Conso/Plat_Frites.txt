@@ -1,0 +1,6 @@
+Nom Frites
+Prix 1
+Description Frites_de_pommes_de_terre,faites_maison
+Allergenes aucun
+Vegan True
+Epice False
