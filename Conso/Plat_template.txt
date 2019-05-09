@@ -1,0 +1,6 @@
+Nom Nom_du_Plat
+Prix 17.5
+Description ingrédients
+Allergenes test,test2
+Vegan False
+Epice True
